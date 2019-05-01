@@ -1,0 +1,401 @@
+# -*- coding: utf-8 -*-
+
+"""
+
+Created on Tue Nov  6 19:49:48 2018
+
+
+
+@author: usuario
+
+"""
+
+import pymongo
+
+import pandas as pd
+
+from pymongo import MongoClient
+
+
+
+connection = MongoClient("localhost",27017)
+
+
+
+db=connection.test
+
+
+
+restaurants = db.restaurants
+
+
+
+item = restaurants.find_one()
+
+print(item["name", "borough"])
+
+
+
+#nitems = restaurants.find({ "borough": "Manhattan" }).count()
+
+#print(nitems)
+
+
+
+#item = restaurants.find({ "borough": "Manhattan" }).limit(3)
+
+#for doc in item:
+
+#    print(doc)
+
+
+
+prueba = restaurants.find({ "borough": "Manhattan" })
+
+
+
+df = pd.DataFrame(list(prueba))
+
+c=df["cuisine"].value_counts()
+
+c.sort_values(ascending=False)
+
+print (c.head(10))
+
+
+
+
+
+#1. Write a MongoDB query to display all the documents in the collection restaurants. 
+
+#db.restaurants.find()
+
+
+
+item = restaurants.find()
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#2. Write a MongoDB query to display the fields restaurant_id, name, borough 
+
+#and cuisine for all the documents in the collection restaurant. 
+
+#db.restaurants.find({}, {"restaurant_id":1, "name":1, "borough" :1, "cuisine":1}).pretty()
+
+item = restaurants.find({}, {"restaurant_id":1, "name":1, "borough" :1, "cuisine":1})
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#3. Write a MongoDB query to display the fields restaurant_id, name, borough and cuisine,
+
+# but exclude the field _id for all the documents in the collection restaurant. 
+
+#db.restaurants.find({}, {"restaurant_id":1, "_id":0, "name":1, "borough" :1, "cuisine":1})
+
+item = restaurants.find({}, {"_id": 0, "restaurant_id":1, "name":1, "borough" :1, "cuisine":1})
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#4. Write a MongoDB query to display all the restaurant which is in the borough Bronx. 
+
+#db.restaurants.find({"borough": "Bronx"})
+
+item = restaurants.find({"borough": "Bronx"})
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#5. Write a MongoDB query to display the first 5 restaurant which is in the borough Bronx. 
+
+#db.restaurants.find({"borough": "Bronx"}).limit(5)
+
+item = restaurants.find({"borough": "Bronx"}).limit(5)
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#6.Write a MongoDB query to display the next 5 restaurants after skipping first 
+
+#5 which are in the borough Bronx. 
+
+#db.restaurants.find({"borough": "Bronx"},{"name":1, "_id":0}).limit(5).skip(5)
+
+item = restaurants.find({"borough": "Bronx"},{"name":1, "_id":0}).limit(5).skip(5)
+
+for doc in item:
+
+    print(doc)
+
+
+
+#7. Write a MongoDB query to find the restaurants who achieved a score more than 90. 
+
+#db.restaurants.find({"grades.score": {$gte : 90}})   
+
+item = restaurants.find({"grades.score": {"$gte" : 90}})
+
+for doc in item:
+
+    print(doc)   
+
+    
+
+#8. Write a MongoDB query to find the restaurants that achieved a score, more than 80
+
+# but less than 100
+
+#db.restaurants.find({ "$and": [{"grades.score": {"$gte" : 80}}, 
+
+#{"grades.score": {"$lt" :100}}] }, {"_id": 0, "name" :1})
+
+item = restaurants.find({ "$and": [{"grades.score": {"$gte" : 80}}, {"grades.score": {"$lt" :100}}] }, {"_id": 0, "name" :1})
+
+for doc in item:
+
+    print(doc)
+
+   
+
+#9. Write a MongoDB query to find the restaurants which locates in latitude value 
+
+#less than -95.754168. 
+
+#db.restaurants.find({"address.coord": {"$lt": -95.754168}},{"_id":0, "name":1, "address.coord":1})
+
+item = restaurants.find({"address.coord": {"$lt": -95.754168}},{"_id":0, "name":1, "address.coord":1})
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#10. Write a MongoDB query to find the restaurants that does not prepare any cuisine of 'American' and their grade
+
+#score more than 70 and latitude less than -65.754168. 
+
+#db.restaurants.find({$and: [{"address.coord": {$lt: -65.754168}}, {"grades.score": {$gt: 70}}, {"cuisine": {$ne : "American"}}]}, {"_id":0, "cuisine":1, "name":1, "address.coord":1})
+
+item = restaurants.find({"$and": [{"address.coord": {"$lt": -65.754168}}, {"grades.score": {"$gt": 70}}, {"cuisine": {"$ne" : "American"}}]}, {"_id":0, "cuisine":1, "name":1, "address.coord":1})
+
+for doc in item:
+
+    print(doc)
+
+    
+
+#11. Write a MongoDB query to find the restaurants which does not prepare any 
+
+#cuisine of 'American ' and achieved a grade point 'A' not belongs to the borough Brooklyn. 
+
+#The document must be displayed according to the cuisine in descending order.
+
+#db.restaurants.find({$and: [{"grades.grade": "A"}, {"borough": {$ne: "Brooklyn"}}, {"cuisine": {$ne : "American"}}]}, 
+
+#{"_id":0, "cuisine":1, "name":1, "address.coord":1}).sort({"cuisine":- 1})
+
+item = restaurants.find({"$and": [{"grades.grade": "A"}, {"borough": {"$ne": "Brooklyn"}}, {"cuisine": {"$ne" : "American"}}]}, {"_id":0, "cuisine":1, "name":1, "address.coord":1})
+
+df = pd.DataFrame(list(item))
+
+c=df["cuisine"].value_counts()
+
+c.sort_values(ascending=True)
+
+print (c.head) 
+
+   
+
+# 12. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for 
+
+#those restaurants which contains 'Wil' as first three letters for its name. 
+
+#db.restaurants.find({name: /^Wil/}, {"_id": 1, "name": 1, "borough": 1, "cuisine":1}) 
+
+item = restaurants.find({"name": {"$regex": "^Wil"}}, {"_id":0, "restaurants_id": 1, "name": 1, "borough": 1, "cuisine":1}) 
+
+for doc in item:
+
+    print(doc)
+
+
+
+# 13. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for
+
+# those restaurants which contains 'ces' as last three letters for its name. 
+
+#db.restaurants.find(
+
+#{name: /ces$/},
+
+#{"_id": 1, "name": 1, "borough": 1, "cuisine":1})
+
+item = restaurants.find({"name": {"$regex": "ces$"}}, {"_id":0, "restaurant_id": 1, "name": 1, "borough": 1, "cuisine":1}) 
+
+for doc in item:
+
+    print(doc)
+
+    
+
+# 14. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for 
+
+#those restaurants which contains 'Reg' as three letters somewhere in its name. 
+
+#db.restaurants.find( {name: /Reg/}, {"_id": 1, "name": 1, "borough": 1, "cuisine":1} )
+
+item = restaurants.find({"name": {"$regex": "Reg"}}, {"_id":0, "restaurant_id": 1, "name": 1, "borough": 1, "cuisine":1}) 
+
+for doc in item:
+
+    print(doc) 
+
+    
+
+ #15. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for 
+
+ #those restaurants which belongs to the borough Staten Island or Queens or Bronxor Brooklyn.
+
+ #db.restaurants.find(
+
+ #{$or: [{"borough": "Staten Island"},{"borough": "Queens"},{"borough": "Bronx"}, {"borough": "Brooklyn"}]},
+
+ #{"_id": 1, "name": 1, "borough": 1, "cuisine":1})
+
+item = restaurants.find({"$or": [{"borough": "Staten Island"},{"borough": "Queens"},{"borough": "Bronx"}, {"borough": "Brooklyn"}]}, {"_id":0, "restaurant_id": 1, "name": 1, "borough": 1, "cuisine":1})
+
+for doc in item:
+
+    print(doc) 
+
+    
+
+ #16. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for 
+
+ #those restaurants which prepared dish except 'American' and 'Chinees' or restaurant's 
+
+ #name begins with letter 'Wil'. 
+
+#db.restaurants.find(
+
+#{$nor: [{"cuisine": "American"}, {"cuisine": "Chinese"}, {name: /^Wil/}]},
+
+#{"_id": 1, "name": 1, "borough": 1, "cuisine":1})
+
+item = restaurants.find({"$nor": [{"cuisine": "American"}, {"cuisine": "Chinese"}, {"name": "$Wil"}]}, {"_id":0, "restaurant_id": 1, "name": 1, "borough": 1, "cuisine":1})
+
+for doc in item:
+
+    print(doc) 
+
+    
+
+17. Write a MongoDB query to find the restaurant Id, name and grades for those restaurants
+
+where 2nd element of grades array contains a grade of "A" and score 9 on an ISODate "2014-08-11T00:00:00Z". 
+
+db.restaurants.find( 
+
+{ "grades.1.date": ISODate("2014-08-11T00:00:00Z"), 
+
+"grades.1.grade":"A" , 
+
+"grades.1.score" : 9}, 
+
+{"restaurant_id" : 1,"name":1,"grades":1});
+
+ 
+
+        item = restaurants.find( 
+
+{ "grades.1.date": "2014-08-11T00:00:00Z", 
+
+"grades.1.grade":"A" , 
+
+"grades.1.score" : 9}, 
+
+{"restaurant_id" : 1,"name":1,"grades":1})
+
+for doc in item:
+
+    print(doc)    
+
+    
+
+18. Write a MongoDB query to arranged the name of the cuisine in ascending order and for
+
+those same cuisine borough should be in descending order. 
+
+db.restaurants.find({},
+
+{"restaurant_id": 1, "name":1, "cuisine":1, "borough":1}
+
+).sort({"cuisine": 1}, {"borough":-1})
+
+
+
+item = restaurants.find({}, {"restaurant_id": 1, "name":1, "cuisine":1, "borough":1})
+
+df = pd.DataFrame(list(item))
+
+c=df["cuisine"].value_counts()
+
+c.sort_values(ascending=True)
+
+print (c.head) 
+
+
+
+#19. Write a MongoDB query which will select all documents in the restaurants collection 
+
+#where the coord field value is Double. 
+
+# db.restaurants.find(
+
+# {"address.coord" : {$type : 1}})
+
+ 
+
+item = restaurants.find({"address.coord" : {"$type" : 1}})
+
+for doc in item:
+
+    print(doc) 
+
+
+
+ #20. Write a MongoDB query which will select the restaurant Id, name and grades for 
+
+ #those restaurants which returns 0 as a remainder after dividing the score by 7. 
+
+ #db.restaurants.find(
+
+ #{grades.score: {$mod:[7,0]}},
+
+ #{"restaurant_id": 1, "name":1, "grades":1})
+
+ 
+
+item = restaurants.find({"grades.score": {"$mod":[7,0]}}, {"restaurant_id": 1, "name":1, "grades":1})
+
+for doc in item:
+
+    print(doc)    

@@ -1,0 +1,61 @@
+1. Obtain restaurants in "Queens"
+db.restaurants.aggregate([
+{"$match": {"borough": "Queens"}}
+])
+
+2.Obtain restaurants outside "Queens"
+db.restaurants.aggregate([
+{"$match": {"borough": {"$ne": "Queens"}}}
+])
+
+3.Obtain only the restaurant name and cuisine
+db.restaurants.aggregate([
+{"$project": {"_id": 0, "name":1, "cuisine": 1}}
+])
+
+4.Obtain only the restaurant name and cuisine for those in "Queens"
+db.restaurants.aggregate([
+{"$match": {"borough": "Queens"}},
+{"$project": {"_id": 0, "name":1, "cuisine": 1}}
+])
+
+5.Find the number of restaurants in each borough
+db.restaurants.aggregate([
+{"$group": {"_id": "$borough", "numRestaurants": {"$sum":1}}}
+])
+
+6. Find the restaurants in the borough "Queens" and with cuisine
+ "Brazilian", and get the number of restaurants for each zipcode in this boroug
+ db.restaurants.aggregate([
+ {"$match": {$and: [{"borough": "Queens"}, {"cuisine": "Brazilian"}]}},
+ {"$group": {"_id": "$address.zipcode", "numRestaurantsZip": {"$sum":1}}}
+ ])
+ 
+ 7. Obtain the average score for restaurants in each borough
+ db.restaurants.aggregate([
+ {"$group": {"_id": "$borough", "avgBorough": {"$avg": "$grades.score"}}}
+ ])
+ 
+  db.restaurants.aggregate([{"$match": {"grades.score": {"$gte:0}}},{"$group": {"_id": "$borough", "avgBorough": {"$avg": "$grades.score"}}}])
+ 
+ 8. Obtain the average score for restaurants in each borough ordered by this average descending
+ db.restaurants.aggregate([
+ {"$match": {"$grades.score": {"$gte": 0}}},
+ {$group: { _id: "borough", avgScore: {$avg: "$grades.score"}}}])
+ 
+ -Using $count. Number of spanish films
+ db.movies.aggregate([
+ {"$project": {"_id": 0, "name":1}},
+ {"$match": {"countries": "Spain"}},
+ {"$count": "SpanishMovies"}])
+
+ -Using $unwind. Number of spanish films every year group by genre.
+ db.movies.aggregate([ 
+ {"$match": {"countries": "Spain"}}, 
+ {"$unwind": "$genres" }, 
+ {"$group": {"_id": {"year": "$year", "genre": "$genres"}, "numFilm": { "$sum": 1 } } }, 
+ {"$sort": { "_id.year": -1, "numFilm": -1 } } ])
+ 
+ 
+ 
+ 
