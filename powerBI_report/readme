@@ -1,0 +1,9 @@
+Making a PowerBI report from the very begining. 
+
+The datas are stored in "PowerBI_MavenMarket_Files.zip" as csv files. 
+
+The Schema is created as a relational model "DB_schema.png".
+
+The data are filtered and cleaned to look up the tables "DB_tables.png".
+
+Final report "DB_report.png".
